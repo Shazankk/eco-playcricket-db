@@ -1,9 +1,7 @@
 import os
-import sqlite3
-import json
 from dotenv import load_dotenv
 import requests
-from routes.initdb import result_summary as result_summary_sql
+import libsql_experimental as libsql
 
 def fetch_result_summary():
     os.environ.pop('API_TOKEN', None)
@@ -17,17 +15,9 @@ def fetch_result_summary():
     siteId = os.getenv('SITE_ID')
     leagueId = os.getenv('LEAGUE_ID')
     competition_type = os.getenv('COMPETITION_TYPE')
-    season = 2024
+    seasons = [2021, 2022, 2023, 2024, 2025]
 
     apiUrl = f"http://play-cricket.com/api/v2/result_summary"
-
-    params = {
-        'api_token': apiToken,
-        'site_id': siteId,
-        'league_id': leagueId,
-        'competition_type': competition_type,
-        'season': season,
-    }
 
     try:
         response = requests.get(apiUrl, params=params)
@@ -60,45 +50,44 @@ def fetch_result_summary():
 
         flattened_data = [flatten_json(item) for item in result_summary]
         
-        # Connect to SQLite database
-        with sqlite3.connect('cavsdatabase.db') as conn:
+        # Store values in Turso database
+        TURSO_DATABASE_URL = os.getenv("TURSO_DATABASE_URL")
+        TURSO_AUTH_TOKEN = os.getenv("TURSO_AUTH_TOKEN")
+
+        if not TURSO_DATABASE_URL or not TURSO_AUTH_TOKEN:
+            print("TURSO_DATABASE_URL and TURSO_AUTH_TOKEN must be set in the environment variables")
+            return
+
+        try:
+            conn = libsql.connect(database='colchestercavs.db', sync_url=TURSO_DATABASE_URL, auth_token=TURSO_AUTH_TOKEN)
             cursor = conn.cursor()
-            
-            # Create table if not exists
-            cursor.execute(result_summary_sql)
-            
-            # Prepare batch insert and update
-            insert_data = []
-            update_data = []
-            
+
+            for season in seasons:
+                params = {
+                    'api_token': apiToken,
+                    'site_id': siteId,
+                    'league_id': leagueId,
+                    'competition_type': competition_type,
+                    'season': season,
+                }
+
             for item in flattened_data:
-                cursor.execute('SELECT * FROM result_summary WHERE id = ?', (item['id'],))
-                existing_record = cursor.fetchone()
-                
-                if existing_record is None:
-                    insert_data.append(tuple(item.values()))
-                else:
-                    existing_data = dict(zip([column[0] for column in cursor.description], existing_record))
-                    if existing_data != item:
-                        update_data.append(tuple(item.values()) + (item['id'],))
-            
-            # Batch insert
-            if insert_data:
-                columns = ', '.join(flattened_data[0].keys())
-                placeholders = ', '.join('?' * len(flattened_data[0]))
-                sql_insert = f'INSERT INTO result_summary ({columns}) VALUES ({placeholders})'
-                cursor.executemany(sql_insert, insert_data)
-            
-            # Batch update
-            # if update_data:
-            #     update_placeholders = ', '.join([f"{col}=?" for col in flattened_data[0].keys()])
-            #     sql_update = f'UPDATE result_summary SET {update_placeholders} WHERE id=?'
-            #     cursor.executemany(sql_update, update_data)
-            
+                columns = ', '.join(item.keys())
+                placeholders = ', '.join('?' * len(item))
+                update_placeholders = ', '.join([f"{col}=?" for col in item.keys()])
+
+                sql_insert = f'INSERT OR IGNORE INTO result_summary ({columns}) VALUES ({placeholders})'
+                sql_update = f'UPDATE result_summary SET {update_placeholders} WHERE id=?'
+
+                cursor.execute(sql_insert, tuple(item.values()))
+                cursor.execute(sql_update, tuple(item.values()) + (item['id'],))
+
             # Commit the transaction
             conn.commit()
-        
-        print("Result summary data saved to database.")
+
+            print("Result summary data saved to database.")
+        except Exception as e:
+            print(f"Failed to connect or execute SQL: {e}")
     else:
         print(f"Failed to fetch data. Status code: {response.status_code}")
         print("Response Content:", response.content)

@@ -2,7 +2,7 @@ import os
 import sqlite3
 from dotenv import load_dotenv
 import requests
-from routes.initdb import competition_teams as competition_teams_sql
+import libsql_experimental as libsql
 
 def fetch_competition_teams():
     os.environ.pop('API_TOKEN', None)
@@ -36,29 +36,39 @@ def fetch_competition_teams():
         data = response.json()
         teams = data['competition_teams']
 
-        # Connect to SQLite database (or create it if it doesn't exist)
-        with sqlite3.connect('cavsdatabase.db') as conn:
+        # Debug: Print fetched data
+        print("Fetched teams data:", teams)
+
+        # Store values in Turso database
+        TURSO_DATABASE_URL = os.getenv("TURSO_DATABASE_URL")
+        TURSO_AUTH_TOKEN = os.getenv("TURSO_AUTH_TOKEN")
+
+        if not TURSO_DATABASE_URL or not TURSO_AUTH_TOKEN:
+            print("TURSO_DATABASE_URL and TURSO_AUTH_TOKEN must be set in the environment variables")
+            return
+
+        try:
+            conn = libsql.connect(database='colchestercavs.db', sync_url=TURSO_DATABASE_URL, auth_token=TURSO_AUTH_TOKEN)
             cursor = conn.cursor()
-            
-            # Create table if not exists
-            cursor.execute(competition_teams_sql)
 
             for team in teams:
                 team['league_id'] = leagueId
                 columns = ', '.join(team.keys())
                 placeholders = ', '.join('?' * len(team))
                 update_placeholders = ', '.join([f"{col}=?" for col in team.keys()])
-                
+
                 sql_insert = f'INSERT OR IGNORE INTO competition_teams ({columns}) VALUES ({placeholders})'
                 sql_update = f'UPDATE competition_teams SET {update_placeholders} WHERE team_id=?'
-                
-                cursor.execute(sql_insert, list(team.values()))
-                cursor.execute(sql_update, list(team.values()) + [team['team_id']])
-            
+
+                cursor.execute(sql_insert, tuple(team.values()))
+                cursor.execute(sql_update, tuple(team.values()) + (team['team_id'],))
+
             # Commit the transaction
             conn.commit()
 
-        print("Competition teams data saved to database.")
+            print("Competition teams data saved to database.")
+        except Exception as e:
+            print(f"Failed to connect or execute SQL: {e}")
     else:
         print(f"Failed to fetch data. Status code: {response.status_code}")
         print("Response Content:", response.content)

@@ -2,7 +2,7 @@ import os
 import sqlite3
 from dotenv import load_dotenv
 import requests
-from routes.initdb import players as playersql
+import libsql_experimental as libsql
 
 def fetch_players():
     os.environ.pop('API_TOKEN', None)
@@ -35,42 +35,39 @@ def fetch_players():
     if response.status_code == 200:
         data = response.json()
         players = data['players']
-        
-        # Connect to SQLite database (or create it if it doesn't exist)
-        with sqlite3.connect('cavsdatabase.db') as conn:
+
+        # Debug: Print fetched data
+        print("Fetched players data:", players)
+
+        # Store values in Turso database
+        TURSO_DATABASE_URL = os.getenv("TURSO_DATABASE_URL")
+        TURSO_AUTH_TOKEN = os.getenv("TURSO_AUTH_TOKEN")
+
+        if not TURSO_DATABASE_URL or not TURSO_AUTH_TOKEN:
+            print("TURSO_DATABASE_URL and TURSO_AUTH_TOKEN must be set in the environment variables")
+            return
+
+        try:
+            conn = libsql.connect(database='colchestercavs.db', sync_url=TURSO_DATABASE_URL, auth_token=TURSO_AUTH_TOKEN)
             cursor = conn.cursor()
-            
-            # Create table schema
-            cursor.execute(playersql)
-            
-            insert_data = []
-            update_data = []
-            
+
             for player in players:
-                cursor.execute('SELECT * FROM players WHERE member_id = ?', (player['member_id'],))
-                existing_record = cursor.fetchone()
-                
-                if existing_record is None:
-                    insert_data.append((player['member_id'], player['name']))
-                else:
-                    existing_data = dict(zip([column[0] for column in cursor.description], existing_record))
-                    if existing_data != player:
-                        update_data.append((player['name'], player['member_id']))
-            
-            # Batch insert
-            if insert_data:
-                sql_insert = 'INSERT INTO players (member_id, name) VALUES (?, ?)'
-                cursor.executemany(sql_insert, insert_data)
-            
-            # Batch update
-            if update_data:
-                sql_update = 'UPDATE players SET name = ? WHERE member_id = ?'
-                cursor.executemany(sql_update, update_data)
-            
+                columns = ', '.join(player.keys())
+                placeholders = ', '.join('?' * len(player))
+                update_placeholders = ', '.join([f"{col}=?" for col in player.keys()])
+
+                sql_insert = f'INSERT OR IGNORE INTO players ({columns}) VALUES ({placeholders})'
+                sql_update = f'UPDATE players SET {update_placeholders} WHERE member_id=?'
+
+                cursor.execute(sql_insert, tuple(player.values()))
+                cursor.execute(sql_update, tuple(player.values()) + (player['member_id'],))
+
             # Commit the transaction
             conn.commit()
-        
-        print("Players data saved to database.")
+
+            print("Players data saved to database.")
+        except Exception as e:
+            print(f"Failed to connect or execute SQL: {e}")
     else:
         print(f"Failed to fetch data. Status code: {response.status_code}")
         print("Response Content:", response.content)
