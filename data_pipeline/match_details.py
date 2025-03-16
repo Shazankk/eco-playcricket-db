@@ -1,6 +1,5 @@
 from datetime import datetime
 import os
-import json
 from dotenv import load_dotenv
 import requests
 import libsql_experimental as libsql

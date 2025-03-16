@@ -3,7 +3,6 @@ import sqlite3
 from dotenv import load_dotenv
 import requests
 import libsql_experimental as libsql
-from routes.initdb import teams as teamsql
 
 def fetch_teams():
     os.environ.pop('API_TOKEN', None)
@@ -49,8 +48,6 @@ def fetch_teams():
         try:
             conn = libsql.connect(database='colchestercavs.db', sync_url=TURSO_DATABASE_URL, auth_token=TURSO_AUTH_TOKEN)
             cursor = conn.cursor()
-
-            cursor.execute(teamsql)
 
             for team in teams:
                 columns = ', '.join(team.keys())

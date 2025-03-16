@@ -15,7 +15,7 @@ def fetch_result_summary():
     siteId = os.getenv('SITE_ID')
     leagueId = os.getenv('LEAGUE_ID')
     competition_type = os.getenv('COMPETITION_TYPE')
-    seasons = [2021, 2022, 2023, 2024, 2025]
+    seasons = [2024, 2025]
 
     apiUrl = f"http://play-cricket.com/api/v2/result_summary"
 

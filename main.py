@@ -1,57 +1,37 @@
-import logging
-from routes.competition_teams import fetch_competition_teams
-from routes.fixtures import fetch_fixtures
-from routes.match_details_normalised import insert_match_data
-from routes.players import fetch_players
-from routes.result_summary import fetch_result_summary
-from routes.teams import fetch_teams
-from routes.match_details_normalised import insert_match_data
+import sys
+import os
+from pathlib import Path
 
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# Debug information
+# print("Python path:\n", sys.path)
+# print("Python version:\n", sys.version)
+# print("Python executable:\n", sys.executable)
+# print("Site packages:\n", Path(sys.__name__).parent / 'site-packages')
 
-def main():
-    # try:
-    #     logging.info("Fetching competition teams...")
-    #     fetch_competition_teams()
-    #     logging.info("Competition teams fetched and saved to database.")
-    # except Exception as e:
-    #     logging.error(f"Error fetching competition teams: {e}")
+try:
+    from fastapi import FastAPI
+    from fastapi.middleware.cors import CORSMiddleware
+    from controllers.api_controller import router
+    import uvicorn
+except ImportError as e:
+    print(f"Import error: {e}")
+    print("\nInstalled packages:")
+    os.system('pip list')
+    sys.exit(1)
 
-    try:
-        logging.info("Fetching fixtures...")
-        fetch_fixtures()
-        logging.info("Fixtures fetched and saved to database.")
-    except Exception as e:
-        logging.error(f"Error fetching fixtures: {e}")
+app = FastAPI(title="Colchester Cavs API")
 
-    try:
-        logging.info("Fetching players...")
-        fetch_players()
-        logging.info("Players fetched and saved to database.")
-    except Exception as e:
-        logging.error(f"Error fetching players: {e}")
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Modify this in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-    try:
-        logging.info("Fetching result summary...")
-        fetch_result_summary()
-        logging.info("Result summary fetched and saved to database.")
-    except Exception as e:
-        logging.error(f"Error fetching result summary: {e}")
-
-    # try:
-    #     logging.info("Fetching teams...")
-    #     fetch_teams()
-    #     logging.info("Teams fetched and saved to database.")
-    # except Exception as e:
-    #     logging.error(f"Error fetching teams: {e}")
-
-    try:
-        logging.info("Fetching match details...")
-        insert_match_data()
-        logging.info("Match details fetched and saved to database.")
-    except Exception as e:
-        logging.error(f"Error fetching match details: {e}")
+# Include the router
+app.include_router(router, prefix="/api/v1")
 
 if __name__ == "__main__":
-    main()
+    uvicorn.run(app, host="0.0.0.0", port=8000)
