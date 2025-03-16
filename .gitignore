@@ -1,4 +1,6 @@
-.env
+.env.local
+.env.development
+.env.production
 /.venv
 /.vscode
 __pycache__/
