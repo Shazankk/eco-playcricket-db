@@ -73,5 +73,5 @@ def fetch_fixtures():
     except Exception as e:
         print(f"Failed to connect or execute SQL: {e}")
 
-if __name__ == "__main__":
-    fetch_fixtures()
+# if __name__ == "__main__":
+#     fetch_fixtures()

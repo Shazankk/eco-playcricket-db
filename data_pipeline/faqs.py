@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 import libsql_experimental as libsql
 
-def get_faq_data():
+def fetch_faqs():
     question = input("Enter FAQ question (required): ").strip()
     if not question:
         print("Question cannot be empty.")
@@ -43,9 +43,9 @@ def insert_faq(faq_data):
     except Exception as e:
         print(f"Failed to insert FAQ data: {e}")
 
-def main():
-    faq = get_faq_data()
-    insert_faq(faq)
+# def main():
+#     faq = fetch_faqs()
+#     insert_faq(faq)
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()

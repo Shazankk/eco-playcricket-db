@@ -37,7 +37,7 @@ def fetch_competition_teams():
         teams = data['competition_teams']
 
         # Debug: Print fetched data
-        print("Fetched teams data:", teams)
+        # print("Fetched teams data:", teams)
 
         # Store values in Turso database
         TURSO_DATABASE_URL = os.getenv("TURSO_DATABASE_URL")

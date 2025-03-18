@@ -19,9 +19,12 @@ def get_db_connection():
     if not db_url or not auth_token:
         raise Exception("Database configuration missing")
         
-    client = libsql.connect(
-        database='colchestercavs.db',
-        sync_url=db_url,
-        auth_token=auth_token
-    )
-    return client
+    try:
+        client = libsql.connect(
+            database='colchestercavs.db',
+            sync_url=db_url,
+            auth_token=auth_token
+        )
+        return client
+    except Exception as e:
+        raise Exception(f"Error connecting to database: {e}")

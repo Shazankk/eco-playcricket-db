@@ -7,7 +7,7 @@ import logging
 
 logging.basicConfig(level=logging.DEBUG)
 
-def insert_match_data():
+def fetch_match_data():
     os.environ.pop('API_TOKEN', None)
 
     load_dotenv()
@@ -45,7 +45,7 @@ def insert_match_data():
                 }
 
             # Print the constructed API call
-            print(f"API call: {apiUrl}?api_token={apiToken}&match_id={match_id[0]}")
+            # print(f"API call: {apiUrl}?api_token={apiToken}&match_id={match_id[0]}")
 
             try:
                 response = requests.get(apiUrl, params=params)
@@ -282,5 +282,9 @@ def insert_match_data():
                 conn.commit()
                 print("Match details data saved to database.")
     except Exception as e:
-        conn.rollback()
+        if conn is not None:
+            try:
+                conn.rollback()
+            except Exception as rollback_err:
+                print(f"Rollback failed: {rollback_err}")
         print(f"Failed to connect or execute SQL: {e}")

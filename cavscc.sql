@@ -368,6 +368,7 @@ CREATE TABLE
 CREATE VIEW player_batting_stats AS
 SELECT 
     p.name,
+    p.member_id,
     COUNT(*) AS total_innings,
     MAX(bs.runs) AS high_score,
     SUM(bs.runs)*1.0 / NULLIF((COUNT(*) - COUNT(CASE WHEN bs.how_out = 'not out' THEN 1 END)), 0) AS average,

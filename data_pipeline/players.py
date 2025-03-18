@@ -37,7 +37,7 @@ def fetch_players():
         players = data['players']
 
         # Debug: Print fetched data
-        print("Fetched players data:", players)
+        # print("Fetched players data:", players)
 
         # Store values in Turso database
         TURSO_DATABASE_URL = os.getenv("TURSO_DATABASE_URL")

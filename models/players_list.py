@@ -3,6 +3,7 @@ from database.connection import get_db_connection
 class PlayersList:
     @staticmethod
     async def get_all_player_stats():
+        conn = None
         try:
             conn = get_db_connection()
             cursor = conn.cursor()

@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 import libsql_experimental as libsql
 
-def get_sponsor_data():
+def fetch_sponsors():
     sponsor_name = input("Enter sponsor name (required): ").strip()
     if not sponsor_name:
         print("Sponsor name cannot be empty.")
@@ -87,9 +87,9 @@ def insert_sponsor(sponsor_data):
     except Exception as e:
         print(f"Failed to insert sponsor data: {e}")
 
-def main():
-    sponsor_data = get_sponsor_data()
-    insert_sponsor(sponsor_data)
+# def main():
+#     sponsor_data = fetch_sponsors()
+#     insert_sponsor(sponsor_data)
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
