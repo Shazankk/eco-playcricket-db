@@ -1,10 +1,68 @@
+# Environment variables
+.env
+.env.*
 .env.local
 .env.development
 .env.production
-/.venv
-/.vscode
+.env.test
+
+# Python
 __pycache__/
-*.db
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+
+# Virtual Environment
+venv/
+.venv/
+ENV/
+env/
+virtualenv/
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
 .DS_Store
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Project specific
+*.db
+*.sqlite
+*.sqlite3
 *.log
-*.pyc
+logs/
+tmp/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Distribution / packaging
+bin/
+include/
