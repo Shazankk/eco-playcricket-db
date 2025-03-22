@@ -4,6 +4,7 @@ from models.teams_list import TeamsList
 from models.sponsors_list import SponsorsList
 from models.fixtures_and_results import FixturesResults
 from models.players_list import PlayersList
+from models.player_profile import PlayersProfile
 
 router = APIRouter()
 
@@ -39,5 +40,12 @@ async def get_fixtures():
 async def get_player_stats():
     try:
         return await PlayersList.get_all_player_stats()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@router.get("/player-profile")
+async def get_player_profile():
+    try:
+        return await PlayersProfile.get_all_player_profile()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

@@ -5,7 +5,10 @@ import uvicorn
 from apscheduler.schedulers.background import BackgroundScheduler
 import subprocess
 import os
+from database.connection import get_db_connection
 
+conn = get_db_connection()
+conn.sync()
 
 app = FastAPI(title="Colchester Cavs API")
 
