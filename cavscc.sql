@@ -347,25 +347,38 @@ CREATE TABLE
     scorer_2_id TEXT
   );
 
-  CREATE TABLE
-  sponsors (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    -- Basic Sponsor Info
-    sponsor_name TEXT NOT NULL,
-    website_link TEXT,
-    logo_url TEXT,            -- URL to the sponsor’s logo (instead of storing the image binary)
+CREATE TABLE
+sponsors (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,          -- Basic Sponsor Info
+  sponsor_name TEXT NOT NULL,
+  website_link TEXT,
+  logo_url TEXT,            -- URL to the sponsor’s logo (instead of storing the image binary)
 
-    -- Polymorphic Linking (Which entity is being sponsored?)
-    sponsored_entity_type TEXT,     -- e.g., 'PLAYER', 'TEAM', or 'CLUB_WIDE'
-    sponsored_entity_id   INTEGER,  -- The actual Player ID or Team ID
+  -- Polymorphic Linking (Which entity is being sponsored?)
+  sponsored_entity_type TEXT,     -- e.g., 'PLAYER', 'TEAM', or 'CLUB_WIDE'
+  sponsored_entity_id   INTEGER,  -- The actual Player ID or Team ID
 
-    -- Timestamps (optional, but good practice)
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  );
+  -- Timestamps (optional, but good practice)
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create player_profile
+CREATE TABLE player_profile (
+  member_id INTEGER PRIMARY KEY,
+  player_name TEXT NOT NULL,
+  birth_date TEXT,
+  nationality TEXT,
+  role TEXT,
+  batting_style TEXT,
+  bowling_style TEXT,
+  debut_year INTEGER,
+  image_path TEXT,
+);
 
 -- Create player_batting_stats view
-CREATE VIEW player_batting_stats AS
+CREATE VIEW 
+player_batting_stats AS
 SELECT 
     p.name,
     p.member_id,
