@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from controllers.api_controller import router
+from controllers.api_controller import router as player_router
 import uvicorn
 from apscheduler.schedulers.background import BackgroundScheduler
 import subprocess
@@ -23,6 +24,7 @@ app.add_middleware(
 
 # Include the router
 app.include_router(router, prefix="/api/v1")
+app.include_router(player_router, prefix="/api/v1/players")
 
 def run_pipeline_job():
     pipeline_script = os.path.join(os.path.dirname(__file__), "run_pipeline.py")

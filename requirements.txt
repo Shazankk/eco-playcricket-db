@@ -5,3 +5,8 @@ python-dotenv==1.0.1
 libsql-experimental==0.0.41
 requests==2.32.3
 APScheduler==3.11.0
+pillow==11.1.0
+pillow-avif-plugin==1.5.1
+python-multipart==0.0.6
+boto3==1.28.57
+httpx==0.25.0
